@@ -1,6 +1,6 @@
 import { Moon, Zap, Code, Sparkles, Bug, Sun } from 'lucide-react'
 import { useTheme } from 'next-themes'
-import { useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 
 interface MoreSubmenuItem {
   id: string
@@ -18,26 +18,31 @@ interface MoreSubmenuProps {
 }
 
 export function MoreSubmenu({ isOpen, onClose, onItemClick, anchorRect }: Readonly<MoreSubmenuProps>) {
-  const { theme, setTheme } = useTheme()
-  const mountedRef = useRef(false)
+  const { theme, setTheme, systemTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
 
-  // Flip the ref to true once after the first paint.
-  // No setState → no extra render → no ESLint warning.
   useEffect(() => {
-    mountedRef.current = true
+    setMounted(true)
   }, [])
 
   if (!isOpen) return null
 
+  // Before mount: show placeholder (avoids hydration mismatch)
+  // After mount: show actual theme state
+  const isDark = mounted 
+    ? (theme === 'system' ? systemTheme === 'dark' : theme === 'dark')
+    : false // default to light/enable dark mode during SSR
+
   const toggleDarkMode = () => {
-    setTheme(theme === 'dark' ? 'light' : 'dark')
+    const newTheme = isDark ? 'light' : 'dark'
+    setTheme(newTheme)
   }
 
   const moreMenuItems: MoreSubmenuItem[] = [
     {
       id: 'dark-mode',
-      icon: mountedRef.current && theme === 'dark' ? Sun : Moon,
-      label: mountedRef.current && theme === 'dark' ? 'Disable Dark Mode' : 'Enable Dark Mode',
+      icon: isDark ? Sun : Moon,
+      label: isDark ? 'Disable Dark Mode' : 'Enable Dark Mode',
       onClick: toggleDarkMode,
     },
     { id: 'animations', icon: Zap, label: 'Disable Animations' },
@@ -54,7 +59,10 @@ export function MoreSubmenu({ isOpen, onClose, onItemClick, anchorRect }: Readon
   }
 
   return (
-    <nav className="absolute left-full ml-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 z-60" style={{ position: 'absolute', left: '100%', marginLeft: '8px', top: anchorRect ? `${anchorRect.top}px` : '0px' }}>
+    <nav 
+      className="absolute left-full ml-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 z-60"
+      style={{ top: anchorRect ? `${anchorRect.top}px` : '0px' }}
+    >
       {moreMenuItems.map((item) => {
         if (item.divider) {
           return <hr key={item.id} className="border-gray-200 my-1" />

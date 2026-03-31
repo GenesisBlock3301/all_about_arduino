@@ -10,67 +10,83 @@ interface DropdownMenuProps {
   onClose: () => void
 }
 
+function DropdownItem({
+  item,
+  onClose,
+  onMoreClick,
+  moreButtonRef,
+}: Readonly<{
+    item: (typeof menuItems)[0]
+    onClose: () => void
+    onMoreClick: () => void
+    moreButtonRef: React.RefObject<HTMLButtonElement | null>
+}>) {
+  if (item.divider) {
+    return <MenuDivider key={item.id} />
+  }
+
+  if (item.avatar) {
+    return <MenuItemWithAvatar key={item.id} label={item.label!} onClick={onClose} />
+  }
+
+  if (!item.icon || !item.label) {
+    return null
+  }
+
+  if (item.submenu) {
+    return (
+      <MenuItem
+        key={item.id}
+        icon={item.icon}
+        label={item.label}
+        hasSubmenu
+        onClick={onMoreClick}
+        ref={moreButtonRef}
+      />
+    )
+  }
+
+  return <MenuItem key={item.id} icon={item.icon} label={item.label} onClick={onClose} />
+}
+
 export const DropdownMenu: React.FC<DropdownMenuProps> = ({ isOpen, onClose }) => {
-  const [isMoreSubmenuOpen, setIsMoreSubmenuOpen] = useState(false)
-  const [moreButtonRect, setMoreButtonRect] = useState<DOMRect | null>(null)
-  const moreButtonRef = useRef<HTMLButtonElement>(null)
+  const [isMoreOpen, setIsMoreOpen] = useState(false)
+  const [moreRect, setMoreRect] = useState<DOMRect | null>(null)
+  const moreRef = useRef<HTMLButtonElement>(null)
 
   if (!isOpen) return null
 
   const handleMoreClick = () => {
-    if (moreButtonRef.current) {
-      setMoreButtonRect(moreButtonRef.current.getBoundingClientRect())
+    if (moreRef.current) {
+      setMoreRect(moreRef.current.getBoundingClientRect())
     }
-    setIsMoreSubmenuOpen(!isMoreSubmenuOpen)
+    setIsMoreOpen(!isMoreOpen)
   }
 
   const handleMoreItemClick = (item: string) => {
-    console.log(`Clicked on: ${item}`)
-    setIsMoreSubmenuOpen(false)
+    console.log(`Clicked: ${item}`)
+    setIsMoreOpen(false)
     onClose()
-  }
-
-  const renderMenuItem = (item: typeof menuItems[0]) => {
-    if (item.divider) {
-      return <MenuDivider key={item.id} />
-    }
-
-    if (item.avatar && item.label) {
-      return (
-        <MenuItemWithAvatar
-          key={item.id}
-          label={item.label}
-          onClick={() => onClose()}
-        />
-      )
-    }
-
-    if (item.icon && item.label) {
-      return (
-        <MenuItem
-          key={item.id}
-          icon={item.icon}
-          label={item.label}
-          hasSubmenu={item.submenu}
-          onClick={item.submenu ? handleMoreClick : () => onClose()}
-          ref={item.submenu ? moreButtonRef : undefined}
-        />
-      )
-    }
-
-    return null
   }
 
   return (
     <nav className="absolute left-0 top-full mt-2 z-50">
       <div className="w-64 bg-white rounded-lg shadow-lg border border-gray-200">
-        {menuItems.map(renderMenuItem)}
+        {menuItems.map((item) => (
+          <DropdownItem
+            key={item.id}
+            item={item}
+            onClose={onClose}
+            onMoreClick={handleMoreClick}
+            moreButtonRef={moreRef}
+          />
+        ))}
       </div>
       <MoreSubmenu
-        isOpen={isMoreSubmenuOpen}
-        onClose={() => setIsMoreSubmenuOpen(false)}
+        isOpen={isMoreOpen}
+        onClose={() => setIsMoreOpen(false)}
         onItemClick={handleMoreItemClick}
-        anchorRect={moreButtonRect}
+        anchorRect={moreRect}
       />
     </nav>
   )

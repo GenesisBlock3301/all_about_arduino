@@ -36,10 +36,10 @@ export default function Sidebar() {
           >
             <Menu className="w-5 h-5" />
           </button>
-          <DropdownMenu
-            isOpen={isMenuOpen}
-            onClose={() => setIsMenuOpen(false)}
-          />
+            <DropdownMenu
+                isOpen={isMenuOpen}
+                onClose={() => setIsMenuOpen(false)}
+            />
         </div>
         <SearchBar
           value={searchTerm}
