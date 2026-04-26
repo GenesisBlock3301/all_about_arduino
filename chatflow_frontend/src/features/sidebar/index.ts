@@ -1,5 +1,0 @@
-export { Sidebar } from './components'
-export { SearchBar } from './components'
-export { DropdownMenu } from './components'
-export { ContactList } from './components'
-export { useClickOutside } from './hooks/useClickOutside'

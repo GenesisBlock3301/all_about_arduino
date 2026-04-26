@@ -1,7 +1,0 @@
-export { default as ChatArea } from './components/ChatArea'
-export { ChatHeader } from './components/ChatHeader'
-export { MessageList } from './components/MessageList'
-export { MessageBubble } from './components/MessageBubble'
-export { MessageInput } from './components/MessageInput'
-export { EmptyChatState } from './components/EmptyChatState'
-export { useChatMessages } from './hooks/useChatMessages'
